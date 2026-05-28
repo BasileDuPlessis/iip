@@ -87,6 +87,18 @@ struct ApplicationSourceNode {
     systems: Vec<SourceSystem>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+struct SourceDetailResponse {
+    period: String,
+    application_id: String,
+    application_name: String,
+    application_type: ApplicationType,
+    source: SourceSystem,
+    coverage: SourceCoverage,
+    freshness: SourceFreshness,
+    evidence: Vec<domain::SourceEvidenceSnapshot>,
+}
+
 #[tokio::main]
 async fn main() {
     let dataset = build_seed_dataset();
@@ -100,6 +112,10 @@ async fn main() {
         .route("/map", get(get_map))
         .route("/heatmap", get(get_heatmap))
         .route("/sources", get(get_sources))
+        .route(
+            "/sources/{application_id}/{source_id}",
+            get(get_source_detail),
+        )
         .route("/applications/{id}/sources", get(get_application_sources))
         .layer(CorsLayer::permissive())
         .with_state(app_state);
@@ -182,6 +198,15 @@ async fn get_sources(State(state): State<AppState>) -> Json<SourcesResponse> {
     Json(build_sources_response(&state))
 }
 
+async fn get_source_detail(
+    Path((application_id, source_id)): Path<(String, String)>,
+    State(state): State<AppState>,
+) -> Result<Json<SourceDetailResponse>, StatusCode> {
+    build_source_detail_response(&state, &application_id, &source_id)
+        .map(Json)
+        .ok_or(StatusCode::NOT_FOUND)
+}
+
 async fn get_application_sources(
     Path(application_id): Path<String>,
     State(state): State<AppState>,
@@ -250,6 +275,38 @@ fn build_sources_response(state: &AppState) -> SourcesResponse {
     }
 }
 
+fn build_source_detail_response(
+    state: &AppState,
+    application_id: &str,
+    source_id: &str,
+) -> Option<SourceDetailResponse> {
+    let application = state
+        .dataset
+        .applications
+        .iter()
+        .find(|app| app.id == application_id)?;
+    let context = state
+        .dataset
+        .source_contexts
+        .iter()
+        .find(|context| context.application_id == application_id)?;
+    let source = context
+        .systems
+        .iter()
+        .find(|source| source.id == source_id)?;
+
+    Some(SourceDetailResponse {
+        period: latest_source_period(&state.dataset),
+        application_id: application.id.clone(),
+        application_name: application.name.clone(),
+        application_type: application.application_type.clone(),
+        source: source.clone(),
+        coverage: context.coverage.clone(),
+        freshness: context.freshness.clone(),
+        evidence: context.monthly_evidence.clone(),
+    })
+}
+
 fn applications_by_capability(dataset: &SeedDataset) -> BTreeMap<String, Vec<ApplicationNode>> {
     let mut map: BTreeMap<String, Vec<ApplicationNode>> = BTreeMap::new();
     for app in &dataset.applications {
@@ -305,7 +362,7 @@ fn business_value_color_token(band: &HeatBand) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use super::{AppState, build_sources_response};
+    use super::{AppState, build_source_detail_response, build_sources_response};
     use dataset_sim::{build_seed_dataset, latest_month_projection};
     use std::sync::Arc;
 
@@ -335,6 +392,53 @@ mod tests {
                 .iter()
                 .all(|system| system.url.starts_with("/sources/"))
         }));
+    }
+
+    #[test]
+    fn source_detail_response_exposes_requested_source() {
+        let dataset = build_seed_dataset();
+        let state = AppState {
+            latest_projection: Arc::new(latest_month_projection(&dataset)),
+            dataset: Arc::new(dataset),
+        };
+
+        let detail = build_source_detail_response(&state, "energy-monitor", "vendor-status")
+            .expect("known source detail should exist");
+
+        assert_eq!(detail.application_id, "energy-monitor");
+        assert_eq!(detail.source.id, "vendor-status");
+        assert_eq!(detail.source.url, "/sources/energy-monitor/vendor-status");
+        assert!(!detail.evidence.is_empty());
+    }
+
+    #[test]
+    fn every_exposed_source_url_resolves_to_detail_payload() {
+        let dataset = build_seed_dataset();
+        let state = AppState {
+            latest_projection: Arc::new(latest_month_projection(&dataset)),
+            dataset: Arc::new(dataset),
+        };
+        let response = build_sources_response(&state);
+
+        for item in &response.items {
+            for system in &item.systems {
+                let detail = build_source_detail_response(&state, &item.application_id, &system.id)
+                    .expect("exposed source URL should resolve");
+                assert_eq!(detail.source.url, system.url);
+            }
+        }
+    }
+
+    #[test]
+    fn unknown_source_detail_returns_none() {
+        let dataset = build_seed_dataset();
+        let state = AppState {
+            latest_projection: Arc::new(latest_month_projection(&dataset)),
+            dataset: Arc::new(dataset),
+        };
+
+        assert!(build_source_detail_response(&state, "energy-monitor", "missing").is_none());
+        assert!(build_source_detail_response(&state, "missing", "vendor-status").is_none());
     }
 }
 
