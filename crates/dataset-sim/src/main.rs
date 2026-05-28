@@ -13,7 +13,12 @@ fn main() {
             "monthly_indicators": dataset.monthly_indicators.len(),
             "source_contexts": dataset.source_contexts.len(),
             "latest_projection_count": latest_projection.len(),
-            "latest_period": "2026-05"
+            "indicator_periods_per_application": dataset.monthly_indicators.len() / dataset.applications.len().max(1),
+            "latest_period": latest_projection
+                .iter()
+                .map(|projection| projection.snapshot.period.as_str())
+                .max()
+                .unwrap_or("unknown")
         })
     );
 }

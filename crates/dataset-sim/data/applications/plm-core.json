@@ -1,0 +1,15 @@
+{
+  "id": "plm-core",
+  "name": "PLM Core",
+  "application_type": "OffTheShelf",
+  "story": "Engineering change backbone with high criticality and vendor-managed release evidence.",
+  "capability_ids": ["engineering-change-management"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "service-now", "name": "ServiceNow", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plm-core/service-now" },
+    { "id": "azure-ad", "name": "Azure AD", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/plm-core/azure-ad" },
+    { "id": "workflow-engine", "name": "Workflow Engine", "source_kind": "Workflow", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plm-core/workflow-engine" },
+    { "id": "erp-mes-events", "name": "ERP/MES Events", "source_kind": "ERP/MES events", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plm-core/erp-mes-events" },
+    { "id": "erp-kpis", "name": "ERP KPI Feed", "source_kind": "Operational KPI", "category": "OperationalOutcome", "cadence": "Weekly", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plm-core/erp-kpis" }
+  ]
+}

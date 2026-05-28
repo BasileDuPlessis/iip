@@ -1,0 +1,1 @@
+{ "id": "application-logs", "application_id": "inventory-pro", "source_url": "/sources/inventory-pro/application-logs", "kind": "analytics_log", "description": "Inventory optimization usage analytics" }

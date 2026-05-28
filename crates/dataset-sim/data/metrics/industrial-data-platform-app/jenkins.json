@@ -1,0 +1,1 @@
+{ "id": "jenkins", "application_id": "industrial-data-platform-app", "source_url": "/sources/industrial-data-platform-app/jenkins", "kind": "ci_cd_log", "description": "Platform release and deployment pipeline feed" }

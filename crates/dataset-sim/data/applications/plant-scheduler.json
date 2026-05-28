@@ -1,0 +1,20 @@
+{
+  "id": "plant-scheduler",
+  "name": "Plant Scheduler",
+  "application_type": "Custom",
+  "story": "Modern scheduling product replacing local spreadsheets across plants.",
+  "capability_ids": ["production-scheduling"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "github", "name": "GitHub", "source_kind": "Source Control", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/plant-scheduler/github" },
+    { "id": "github-actions", "name": "GitHub Actions", "source_kind": "CI/CD", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/plant-scheduler/github-actions" },
+    { "id": "argocd", "name": "ArgoCD", "source_kind": "Deployment", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plant-scheduler/argocd" },
+    { "id": "datadog", "name": "Datadog", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "NearRealTime", "reliability": "High", "completeness": "Partial", "url": "/sources/plant-scheduler/datadog" },
+    { "id": "pagerduty", "name": "PagerDuty", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "NearRealTime", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plant-scheduler/pagerduty" },
+    { "id": "application-logs", "name": "Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "NearRealTime", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plant-scheduler/application-logs" },
+    { "id": "okta", "name": "Okta", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/plant-scheduler/okta" },
+    { "id": "camunda", "name": "Camunda", "source_kind": "Workflow", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plant-scheduler/camunda" },
+    { "id": "erp-mes-events", "name": "ERP/MES Events", "source_kind": "ERP/MES events", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plant-scheduler/erp-mes-events" },
+    { "id": "mes-kpis", "name": "MES KPI Feed", "source_kind": "Operational KPI", "category": "OperationalOutcome", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plant-scheduler/mes-kpis" }
+  ]
+}

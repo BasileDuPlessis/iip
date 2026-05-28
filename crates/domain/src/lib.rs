@@ -97,6 +97,7 @@ pub struct SourceSystem {
     pub id: String,
     pub name: String,
     pub source_kind: String,
+    pub url: String,
     pub category: SourceCategory,
     pub cadence: SourceCadence,
     pub reliability: SourceReliability,

@@ -1,0 +1,14 @@
+{
+  "id": "inventory-pro",
+  "name": "Inventory Pro",
+  "application_type": "SaaS",
+  "story": "SaaS inventory optimizer with vendor-operated delivery and strong user telemetry.",
+  "capability_ids": ["inventory-management"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "vendor-status", "name": "Vendor Status Feed", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/inventory-pro/vendor-status" },
+    { "id": "iam-sso", "name": "IAM/SSO", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/inventory-pro/iam-sso" },
+    { "id": "application-logs", "name": "Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/inventory-pro/application-logs" },
+    { "id": "reporting-platform", "name": "Reporting Platform", "source_kind": "Reporting platform", "category": "OperationalOutcome", "cadence": "Weekly", "reliability": "Medium", "completeness": "Partial", "url": "/sources/inventory-pro/reporting-platform" }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "maintenance-hub",
+  "name": "Maintenance Hub",
+  "application_type": "Custom",
+  "story": "Custom maintenance workflow with active product ownership and improving adoption.",
+  "capability_ids": ["maintenance-work-orders"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "github", "name": "GitHub", "source_kind": "Source Control", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/maintenance-hub/github" },
+    { "id": "github-actions", "name": "GitHub Actions", "source_kind": "CI/CD", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/maintenance-hub/github-actions" },
+    { "id": "argocd", "name": "ArgoCD", "source_kind": "Deployment", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/maintenance-hub/argocd" },
+    { "id": "datadog", "name": "Datadog", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "NearRealTime", "reliability": "High", "completeness": "Partial", "url": "/sources/maintenance-hub/datadog" },
+    { "id": "pagerduty", "name": "PagerDuty", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "NearRealTime", "reliability": "Medium", "completeness": "Partial", "url": "/sources/maintenance-hub/pagerduty" },
+    { "id": "application-logs", "name": "Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "NearRealTime", "reliability": "Medium", "completeness": "Partial", "url": "/sources/maintenance-hub/application-logs" },
+    { "id": "okta", "name": "Okta", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/maintenance-hub/okta" },
+    { "id": "camunda", "name": "Camunda", "source_kind": "Workflow", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/maintenance-hub/camunda" },
+    { "id": "erp-mes-events", "name": "ERP/MES Events", "source_kind": "ERP/MES events", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/maintenance-hub/erp-mes-events" },
+    { "id": "mes-kpis", "name": "MES KPI Feed", "source_kind": "Operational KPI", "category": "OperationalOutcome", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/maintenance-hub/mes-kpis" }
+  ]
+}

@@ -1,0 +1,1 @@
+{ "id": "application-logs", "application_id": "energy-monitor", "source_url": "/sources/energy-monitor/application-logs", "kind": "analytics_log", "description": "Energy-monitor adoption analytics" }

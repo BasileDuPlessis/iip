@@ -1,0 +1,15 @@
+{
+  "id": "mes-alpha",
+  "name": "MES Alpha",
+  "application_type": "OffTheShelf",
+  "story": "Packaged MES used on priority lines with improving workflow instrumentation.",
+  "capability_ids": ["shopfloor-execution", "production-scheduling"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "service-now", "name": "ServiceNow", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/mes-alpha/service-now" },
+    { "id": "azure-ad", "name": "Azure AD", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/mes-alpha/azure-ad" },
+    { "id": "workflow-engine", "name": "Workflow Engine", "source_kind": "Workflow", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/mes-alpha/workflow-engine" },
+    { "id": "erp-mes-events", "name": "ERP/MES Events", "source_kind": "ERP/MES events", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/mes-alpha/erp-mes-events" },
+    { "id": "erp-kpis", "name": "ERP KPI Feed", "source_kind": "Operational KPI", "category": "OperationalOutcome", "cadence": "Weekly", "reliability": "Medium", "completeness": "Partial", "url": "/sources/mes-alpha/erp-kpis" }
+  ]
+}

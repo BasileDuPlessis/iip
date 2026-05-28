@@ -1,0 +1,18 @@
+{
+  "id": "industrial-data-platform-app",
+  "name": "Industrial Data Platform",
+  "application_type": "Platform",
+  "story": "Shared telemetry platform with broad source coverage and mature delivery practices.",
+  "capability_ids": ["industrial-data-platform"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "gitlab", "name": "GitLab", "source_kind": "Source Control", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/industrial-data-platform-app/gitlab" },
+    { "id": "jenkins", "name": "Jenkins", "source_kind": "CI/CD", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/industrial-data-platform-app/jenkins" },
+    { "id": "kubernetes", "name": "Kubernetes", "source_kind": "Deployment", "category": "TechnicalDelivery", "cadence": "NearRealTime", "reliability": "High", "completeness": "Complete", "url": "/sources/industrial-data-platform-app/kubernetes" },
+    { "id": "grafana", "name": "Grafana", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "NearRealTime", "reliability": "High", "completeness": "Partial", "url": "/sources/industrial-data-platform-app/grafana" },
+    { "id": "keycloak", "name": "Keycloak", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/industrial-data-platform-app/keycloak" },
+    { "id": "workflow-platform", "name": "Workflow Platform", "source_kind": "Workflow", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/industrial-data-platform-app/workflow-platform" },
+    { "id": "iot-telemetry", "name": "Industrial IoT Telemetry", "source_kind": "Industrial IoT", "category": "OperationalOutcome", "cadence": "NearRealTime", "reliability": "Medium", "completeness": "Partial", "url": "/sources/industrial-data-platform-app/iot-telemetry" },
+    { "id": "process-mining", "name": "Process Mining", "source_kind": "Process mining", "category": "OperationalOutcome", "cadence": "Weekly", "reliability": "Medium", "completeness": "Partial", "url": "/sources/industrial-data-platform-app/process-mining" }
+  ]
+}

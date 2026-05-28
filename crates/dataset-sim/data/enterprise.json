@@ -1,0 +1,37 @@
+{
+  "name": "Industrial Intelligence Platform Demo Manufacturing",
+  "domains": [
+    { "id": "manufacturing-operations", "name": "Manufacturing Operations" },
+    { "id": "quality-compliance", "name": "Quality & Compliance" },
+    { "id": "maintenance-reliability", "name": "Maintenance & Reliability" },
+    { "id": "supply-chain-logistics", "name": "Supply Chain & Logistics" },
+    { "id": "engineering-product-lifecycle", "name": "Engineering & Product Lifecycle" },
+    { "id": "data-reporting", "name": "Data & Reporting" }
+  ],
+  "capabilities": [
+    { "id": "production-scheduling", "domain_id": "manufacturing-operations", "name": "Production Scheduling" },
+    { "id": "shopfloor-execution", "domain_id": "manufacturing-operations", "name": "Shopfloor Execution" },
+    { "id": "quality-incident-management", "domain_id": "quality-compliance", "name": "Quality Incident Management" },
+    { "id": "traceability", "domain_id": "quality-compliance", "name": "Traceability" },
+    { "id": "maintenance-work-orders", "domain_id": "maintenance-reliability", "name": "Maintenance Work Orders" },
+    { "id": "predictive-maintenance", "domain_id": "maintenance-reliability", "name": "Predictive Maintenance" },
+    { "id": "inventory-management", "domain_id": "supply-chain-logistics", "name": "Inventory Management" },
+    { "id": "engineering-change-management", "domain_id": "engineering-product-lifecycle", "name": "Engineering Change Management" },
+    { "id": "operational-reporting", "domain_id": "data-reporting", "name": "Operational Reporting" },
+    { "id": "industrial-data-platform", "domain_id": "data-reporting", "name": "Industrial Data Platform" }
+  ],
+  "applications": [
+    { "id": "sap-s4-erp", "name": "SAP S/4 ERP", "application_type": "OffTheShelf" },
+    { "id": "mes-alpha", "name": "MES Alpha", "application_type": "OffTheShelf" },
+    { "id": "plm-core", "name": "PLM Core", "application_type": "OffTheShelf" },
+    { "id": "maintenance-hub", "name": "Maintenance Hub", "application_type": "Custom" },
+    { "id": "plant-scheduler", "name": "Plant Scheduler", "application_type": "Custom" },
+    { "id": "operator-portal", "name": "Operator Portal", "application_type": "Custom" },
+    { "id": "quality-tracker", "name": "Quality Tracker", "application_type": "Custom" },
+    { "id": "inventory-pro", "name": "Inventory Pro", "application_type": "SaaS" },
+    { "id": "energy-monitor", "name": "Energy Monitor", "application_type": "SaaS" },
+    { "id": "industrial-data-platform-app", "name": "Industrial Data Platform", "application_type": "Platform" },
+    { "id": "legacy-reporting-cube", "name": "Legacy Reporting Cube", "application_type": "Legacy" },
+    { "id": "excel-macros-local-ops", "name": "Excel Macros Local Ops", "application_type": "ShadowIT" }
+  ]
+}

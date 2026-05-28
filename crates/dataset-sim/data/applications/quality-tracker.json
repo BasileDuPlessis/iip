@@ -1,0 +1,20 @@
+{
+  "id": "quality-tracker",
+  "name": "Quality Tracker",
+  "application_type": "Custom",
+  "story": "Quality incident and traceability app with strong workflow evidence.",
+  "capability_ids": ["quality-incident-management", "traceability"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "github", "name": "GitHub", "source_kind": "Source Control", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/quality-tracker/github" },
+    { "id": "github-actions", "name": "GitHub Actions", "source_kind": "CI/CD", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/quality-tracker/github-actions" },
+    { "id": "argocd", "name": "ArgoCD", "source_kind": "Deployment", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/quality-tracker/argocd" },
+    { "id": "datadog", "name": "Datadog", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "NearRealTime", "reliability": "High", "completeness": "Partial", "url": "/sources/quality-tracker/datadog" },
+    { "id": "pagerduty", "name": "PagerDuty", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "NearRealTime", "reliability": "Medium", "completeness": "Partial", "url": "/sources/quality-tracker/pagerduty" },
+    { "id": "application-logs", "name": "Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "NearRealTime", "reliability": "Medium", "completeness": "Partial", "url": "/sources/quality-tracker/application-logs" },
+    { "id": "okta", "name": "Okta", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/quality-tracker/okta" },
+    { "id": "camunda", "name": "Camunda", "source_kind": "Workflow", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/quality-tracker/camunda" },
+    { "id": "erp-mes-events", "name": "ERP/MES Events", "source_kind": "ERP/MES events", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/quality-tracker/erp-mes-events" },
+    { "id": "mes-kpis", "name": "MES KPI Feed", "source_kind": "Operational KPI", "category": "OperationalOutcome", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/quality-tracker/mes-kpis" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "legacy-reporting-cube",
+  "name": "Legacy Reporting Cube",
+  "application_type": "Legacy",
+  "story": "Aging reporting cube with batch refreshes, brittle operations, and stale evidence risk.",
+  "capability_ids": ["operational-reporting"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "legacy-incidents", "name": "Legacy Incident Register", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Weekly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/legacy-reporting-cube/legacy-incidents" },
+    { "id": "legacy-logs", "name": "Legacy Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "Weekly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/legacy-reporting-cube/legacy-logs" },
+    { "id": "erp-mes-events", "name": "ERP/MES Events", "source_kind": "ERP/MES events", "category": "AdoptionDiffusion", "cadence": "Weekly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/legacy-reporting-cube/erp-mes-events" },
+    { "id": "excel-kpis", "name": "Spreadsheet KPI Feed", "source_kind": "Operational KPI", "category": "OperationalOutcome", "cadence": "Monthly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/legacy-reporting-cube/excel-kpis" }
+  ]
+}

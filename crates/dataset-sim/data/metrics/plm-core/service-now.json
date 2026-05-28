@@ -1,0 +1,1 @@
+{ "id": "service-now", "application_id": "plm-core", "source_url": "/sources/plm-core/service-now", "kind": "incident_log", "description": "PLM vendor ticket and incident history" }

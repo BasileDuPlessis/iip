@@ -1,14 +1,45 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use domain::{
-    Application, ApplicationSourceContext, ApplicationType, BusinessValueDetails, Capability, Domain,
-    DoraMetrics, HeatBand, IndicatorSnapshot, SourceCadence, SourceCategory, SourceCompleteness,
-    SourceCoverage, SourceEvidenceSnapshot, SourceFreshness, SourceReliability, SourceSystem,
+    Application, ApplicationSourceContext, ApplicationType, BusinessValueDetails, Capability,
+    Domain, DoraMetrics, HeatBand, IndicatorSnapshot, SourceCadence, SourceCategory,
+    SourceCompleteness, SourceCoverage, SourceEvidenceSnapshot, SourceFreshness, SourceReliability,
+    SourceSystem,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-const PERIOD_COUNT: usize = 24;
-const TARGETED_PLANTS: u8 = 3;
+pub const PERIOD_COUNT: usize = 12;
+pub const LATEST_PERIOD: &str = "2026-05";
+
+const ENTERPRISE_FIXTURE: &str = include_str!("../data/enterprise.json");
+const APPLICATION_FIXTURES: &[&str] = &[
+    include_str!("../data/applications/sap-s4-erp.json"),
+    include_str!("../data/applications/mes-alpha.json"),
+    include_str!("../data/applications/plm-core.json"),
+    include_str!("../data/applications/maintenance-hub.json"),
+    include_str!("../data/applications/plant-scheduler.json"),
+    include_str!("../data/applications/operator-portal.json"),
+    include_str!("../data/applications/quality-tracker.json"),
+    include_str!("../data/applications/inventory-pro.json"),
+    include_str!("../data/applications/energy-monitor.json"),
+    include_str!("../data/applications/industrial-data-platform-app.json"),
+    include_str!("../data/applications/legacy-reporting-cube.json"),
+    include_str!("../data/applications/excel-macros-local-ops.json"),
+];
+const METRIC_FIXTURES: &[&str] = &[
+    include_str!("../data/metrics/sap-s4-erp/service-now.json"),
+    include_str!("../data/metrics/mes-alpha/service-now.json"),
+    include_str!("../data/metrics/plm-core/service-now.json"),
+    include_str!("../data/metrics/maintenance-hub/github-actions.json"),
+    include_str!("../data/metrics/plant-scheduler/github-actions.json"),
+    include_str!("../data/metrics/operator-portal/github-actions.json"),
+    include_str!("../data/metrics/quality-tracker/github-actions.json"),
+    include_str!("../data/metrics/inventory-pro/application-logs.json"),
+    include_str!("../data/metrics/energy-monitor/application-logs.json"),
+    include_str!("../data/metrics/industrial-data-platform-app/jenkins.json"),
+    include_str!("../data/metrics/legacy-reporting-cube/legacy-incidents.json"),
+    include_str!("../data/metrics/excel-macros-local-ops/shared-spreadsheets.json"),
+];
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 pub struct ApplicationMonthlyIndicator {
@@ -31,191 +62,100 @@ pub struct LatestApplicationProjection {
     pub snapshot: IndicatorSnapshot,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+struct EnterpriseFixture {
+    #[allow(dead_code)]
+    name: String,
+    domains: Vec<Domain>,
+    capabilities: Vec<Capability>,
+    applications: Vec<ApplicationSummaryFixture>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct ApplicationSummaryFixture {
+    id: String,
+    name: String,
+    application_type: ApplicationType,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct ApplicationFixture {
+    id: String,
+    name: String,
+    application_type: ApplicationType,
+    #[allow(dead_code)]
+    story: String,
+    capability_ids: Vec<String>,
+    targeted_plants: u8,
+    source_systems: Vec<SourceSystemFixture>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct SourceSystemFixture {
+    id: String,
+    name: String,
+    source_kind: String,
+    category: SourceCategory,
+    cadence: SourceCadence,
+    reliability: SourceReliability,
+    completeness: SourceCompleteness,
+    url: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct MetricSourceFixture {
+    id: String,
+    application_id: String,
+    source_url: String,
+    #[allow(dead_code)]
+    kind: String,
+    #[allow(dead_code)]
+    description: String,
+}
+
+#[derive(Debug, Clone)]
+struct LoadedFixtures {
+    enterprise: EnterpriseFixture,
+    applications: Vec<ApplicationFixture>,
+    metrics: Vec<MetricSourceFixture>,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq)]
+enum SimulationProfile {
+    Legacy,
+    Modern,
+    Platform,
+    ShadowIT,
+    SaaS,
+    OffTheShelf,
+}
+
 pub fn build_seed_dataset() -> SeedDataset {
-    let domains = vec![
-        Domain {
-            id: "manufacturing-operations".to_owned(),
-            name: "Manufacturing Operations".to_owned(),
-        },
-        Domain {
-            id: "quality-compliance".to_owned(),
-            name: "Quality & Compliance".to_owned(),
-        },
-        Domain {
-            id: "maintenance-reliability".to_owned(),
-            name: "Maintenance & Reliability".to_owned(),
-        },
-        Domain {
-            id: "supply-chain-logistics".to_owned(),
-            name: "Supply Chain & Logistics".to_owned(),
-        },
-        Domain {
-            id: "engineering-product-lifecycle".to_owned(),
-            name: "Engineering & Product Lifecycle".to_owned(),
-        },
-        Domain {
-            id: "data-reporting".to_owned(),
-            name: "Data & Reporting".to_owned(),
-        },
-    ];
+    let fixtures = load_fixtures().expect("dataset-sim fixtures must be valid");
+    let periods = monthly_periods_ending(LATEST_PERIOD, PERIOD_COUNT);
+    let applications = fixtures
+        .applications
+        .iter()
+        .map(|fixture| Application {
+            id: fixture.id.clone(),
+            name: fixture.name.clone(),
+            application_type: fixture.application_type.clone(),
+            capability_ids: fixture.capability_ids.clone(),
+        })
+        .collect::<Vec<_>>();
 
-    let capabilities = vec![
-        Capability {
-            id: "production-scheduling".to_owned(),
-            domain_id: "manufacturing-operations".to_owned(),
-            name: "Production Scheduling".to_owned(),
-        },
-        Capability {
-            id: "shopfloor-execution".to_owned(),
-            domain_id: "manufacturing-operations".to_owned(),
-            name: "Shopfloor Execution".to_owned(),
-        },
-        Capability {
-            id: "quality-incident-management".to_owned(),
-            domain_id: "quality-compliance".to_owned(),
-            name: "Quality Incident Management".to_owned(),
-        },
-        Capability {
-            id: "traceability".to_owned(),
-            domain_id: "quality-compliance".to_owned(),
-            name: "Traceability".to_owned(),
-        },
-        Capability {
-            id: "maintenance-work-orders".to_owned(),
-            domain_id: "maintenance-reliability".to_owned(),
-            name: "Maintenance Work Orders".to_owned(),
-        },
-        Capability {
-            id: "predictive-maintenance".to_owned(),
-            domain_id: "maintenance-reliability".to_owned(),
-            name: "Predictive Maintenance".to_owned(),
-        },
-        Capability {
-            id: "inventory-management".to_owned(),
-            domain_id: "supply-chain-logistics".to_owned(),
-            name: "Inventory Management".to_owned(),
-        },
-        Capability {
-            id: "engineering-change-management".to_owned(),
-            domain_id: "engineering-product-lifecycle".to_owned(),
-            name: "Engineering Change Management".to_owned(),
-        },
-        Capability {
-            id: "operational-reporting".to_owned(),
-            domain_id: "data-reporting".to_owned(),
-            name: "Operational Reporting".to_owned(),
-        },
-        Capability {
-            id: "industrial-data-platform".to_owned(),
-            domain_id: "data-reporting".to_owned(),
-            name: "Industrial Data Platform".to_owned(),
-        },
-    ];
-
-    let applications = vec![
-        Application {
-            id: "sap-s4-erp".to_owned(),
-            name: "SAP S/4 ERP".to_owned(),
-            application_type: ApplicationType::OffTheShelf,
-            capability_ids: vec!["inventory-management".to_owned()],
-        },
-        Application {
-            id: "mes-alpha".to_owned(),
-            name: "MES Alpha".to_owned(),
-            application_type: ApplicationType::OffTheShelf,
-            capability_ids: vec![
-                "shopfloor-execution".to_owned(),
-                "production-scheduling".to_owned(),
-            ],
-        },
-        Application {
-            id: "plm-core".to_owned(),
-            name: "PLM Core".to_owned(),
-            application_type: ApplicationType::OffTheShelf,
-            capability_ids: vec!["engineering-change-management".to_owned()],
-        },
-        Application {
-            id: "maintenance-hub".to_owned(),
-            name: "Maintenance Hub".to_owned(),
-            application_type: ApplicationType::Custom,
-            capability_ids: vec!["maintenance-work-orders".to_owned()],
-        },
-        Application {
-            id: "plant-scheduler".to_owned(),
-            name: "Plant Scheduler".to_owned(),
-            application_type: ApplicationType::Custom,
-            capability_ids: vec!["production-scheduling".to_owned()],
-        },
-        Application {
-            id: "operator-portal".to_owned(),
-            name: "Operator Portal".to_owned(),
-            application_type: ApplicationType::Custom,
-            capability_ids: vec!["shopfloor-execution".to_owned()],
-        },
-        Application {
-            id: "quality-tracker".to_owned(),
-            name: "Quality Tracker".to_owned(),
-            application_type: ApplicationType::Custom,
-            capability_ids: vec![
-                "quality-incident-management".to_owned(),
-                "traceability".to_owned(),
-            ],
-        },
-        Application {
-            id: "inventory-pro".to_owned(),
-            name: "Inventory Pro".to_owned(),
-            application_type: ApplicationType::SaaS,
-            capability_ids: vec!["inventory-management".to_owned()],
-        },
-        Application {
-            id: "energy-monitor".to_owned(),
-            name: "Energy Monitor".to_owned(),
-            application_type: ApplicationType::SaaS,
-            capability_ids: vec!["operational-reporting".to_owned()],
-        },
-        Application {
-            id: "industrial-data-platform-app".to_owned(),
-            name: "Industrial Data Platform".to_owned(),
-            application_type: ApplicationType::Platform,
-            capability_ids: vec!["industrial-data-platform".to_owned()],
-        },
-        Application {
-            id: "legacy-reporting-cube".to_owned(),
-            name: "Legacy Reporting Cube".to_owned(),
-            application_type: ApplicationType::Legacy,
-            capability_ids: vec!["operational-reporting".to_owned()],
-        },
-        Application {
-            id: "excel-macros-local-ops".to_owned(),
-            name: "Excel Macros Local Ops".to_owned(),
-            application_type: ApplicationType::ShadowIT,
-            capability_ids: vec![
-                "shopfloor-execution".to_owned(),
-                "operational-reporting".to_owned(),
-            ],
-        },
-    ];
-
-    let periods = monthly_periods("2024-06", PERIOD_COUNT);
     let mut monthly_indicators = Vec::new();
     let mut source_contexts = Vec::new();
 
-    for (index, application) in applications.iter().enumerate() {
-        monthly_indicators.extend(build_application_indicators(
-            &application.id,
-            index as i32,
-            &periods,
-        ));
-        source_contexts.push(build_application_source_context(
-            application,
-            index as i32,
-            &periods,
-        ));
+    for (index, fixture) in fixtures.applications.iter().enumerate() {
+        let seed = (index as i32) + metric_seed(&fixtures.metrics, &fixture.id);
+        monthly_indicators.extend(build_application_indicators(fixture, seed, &periods));
+        source_contexts.push(build_application_source_context(fixture, seed, &periods));
     }
 
     SeedDataset {
-        domains,
-        capabilities,
+        domains: fixtures.enterprise.domains,
+        capabilities: fixtures.enterprise.capabilities,
         applications,
         monthly_indicators,
         source_contexts,
@@ -242,30 +182,193 @@ pub fn latest_month_projection(dataset: &SeedDataset) -> Vec<LatestApplicationPr
         .collect()
 }
 
-fn monthly_periods(start_period: &str, count: usize) -> Vec<String> {
-    let (year, month) = start_period
-        .split_once('-')
-        .and_then(|(y, m)| Some((y.parse::<i32>().ok()?, m.parse::<i32>().ok()?)))
-        .expect("start_period must be in YYYY-MM format");
+fn load_fixtures() -> Result<LoadedFixtures, String> {
+    let enterprise = serde_json::from_str::<EnterpriseFixture>(ENTERPRISE_FIXTURE)
+        .map_err(|err| format!("invalid enterprise fixture: {err}"))?;
+    let applications = APPLICATION_FIXTURES
+        .iter()
+        .map(|fixture| {
+            serde_json::from_str::<ApplicationFixture>(fixture)
+                .map_err(|err| format!("invalid application fixture: {err}"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let metrics = METRIC_FIXTURES
+        .iter()
+        .map(|fixture| {
+            serde_json::from_str::<MetricSourceFixture>(fixture)
+                .map_err(|err| format!("invalid metric fixture: {err}"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
 
-    let mut periods = Vec::with_capacity(count);
-    let mut y = year;
-    let mut m = month;
+    let loaded = LoadedFixtures {
+        enterprise,
+        applications,
+        metrics,
+    };
+    validate_fixtures(&loaded)?;
+    Ok(loaded)
+}
 
-    for _ in 0..count {
-        periods.push(format!("{y:04}-{m:02}"));
-        m += 1;
-        if m > 12 {
-            m = 1;
-            y += 1;
+fn validate_fixtures(fixtures: &LoadedFixtures) -> Result<(), String> {
+    let enterprise_app_ids = fixtures
+        .enterprise
+        .applications
+        .iter()
+        .map(|app| app.id.as_str())
+        .collect::<BTreeSet<_>>();
+    let detail_app_ids = fixtures
+        .applications
+        .iter()
+        .map(|app| app.id.as_str())
+        .collect::<BTreeSet<_>>();
+    if enterprise_app_ids != detail_app_ids {
+        return Err(format!(
+            "enterprise application ids do not match detail fixtures: enterprise={enterprise_app_ids:?} detail={detail_app_ids:?}"
+        ));
+    }
+
+    let capability_ids = fixtures
+        .enterprise
+        .capabilities
+        .iter()
+        .map(|capability| capability.id.as_str())
+        .collect::<BTreeSet<_>>();
+    for application in &fixtures.applications {
+        let Some(summary) = fixtures
+            .enterprise
+            .applications
+            .iter()
+            .find(|summary| summary.id == application.id)
+        else {
+            return Err(format!("missing enterprise summary for {}", application.id));
+        };
+        if summary.name != application.name
+            || summary.application_type != application.application_type
+        {
+            return Err(format!(
+                "application summary mismatch for {}",
+                application.id
+            ));
+        }
+        for capability_id in &application.capability_ids {
+            if !capability_ids.contains(capability_id.as_str()) {
+                return Err(format!(
+                    "{} references unknown capability {}",
+                    application.id, capability_id
+                ));
+            }
+        }
+        for source in &application.source_systems {
+            if !source.url.starts_with("/sources/") {
+                return Err(format!(
+                    "{} source {} has non-relative source URL {}",
+                    application.id, source.id, source.url
+                ));
+            }
+        }
+        validate_required_source_categories(application)?;
+    }
+
+    let source_urls_by_application = fixtures
+        .applications
+        .iter()
+        .map(|application| {
+            (
+                application.id.as_str(),
+                application
+                    .source_systems
+                    .iter()
+                    .map(|source| source.url.as_str())
+                    .collect::<BTreeSet<_>>(),
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
+    for metric in &fixtures.metrics {
+        let Some(source_urls) = source_urls_by_application.get(metric.application_id.as_str())
+        else {
+            return Err(format!(
+                "metric {} references unknown application {}",
+                metric.id, metric.application_id
+            ));
+        };
+        if !source_urls.contains(metric.source_url.as_str()) {
+            return Err(format!(
+                "metric {} references source URL not defined on {}",
+                metric.id, metric.application_id
+            ));
         }
     }
 
-    periods
+    Ok(())
+}
+
+fn validate_required_source_categories(application: &ApplicationFixture) -> Result<(), String> {
+    let has_technical = has_source_category(application, SourceCategory::TechnicalDelivery);
+    let has_adoption = has_source_category(application, SourceCategory::AdoptionDiffusion);
+    let has_outcome = has_source_category(application, SourceCategory::OperationalOutcome);
+
+    let profile = simulation_profile(application);
+    let valid = match profile {
+        SimulationProfile::ShadowIT => has_adoption && has_outcome,
+        SimulationProfile::SaaS | SimulationProfile::OffTheShelf => {
+            has_technical && has_adoption && has_outcome
+        }
+        SimulationProfile::Legacy | SimulationProfile::Modern | SimulationProfile::Platform => {
+            has_technical && has_adoption && has_outcome
+        }
+    };
+
+    if valid {
+        Ok(())
+    } else {
+        Err(format!(
+            "{} does not define source coverage required for {:?}",
+            application.id, profile
+        ))
+    }
+}
+
+fn simulation_profile(application: &ApplicationFixture) -> SimulationProfile {
+    match application.application_type {
+        ApplicationType::Custom => SimulationProfile::Modern,
+        ApplicationType::OffTheShelf => SimulationProfile::OffTheShelf,
+        ApplicationType::SaaS => SimulationProfile::SaaS,
+        ApplicationType::Legacy => SimulationProfile::Legacy,
+        ApplicationType::Platform => SimulationProfile::Platform,
+        ApplicationType::ShadowIT => SimulationProfile::ShadowIT,
+    }
+}
+
+fn has_source_category(application: &ApplicationFixture, category: SourceCategory) -> bool {
+    application
+        .source_systems
+        .iter()
+        .any(|source| source.category == category)
+}
+
+fn monthly_periods_ending(latest_period: &str, count: usize) -> Vec<String> {
+    let (latest_year, latest_month) = parse_period(latest_period);
+    let latest_index = latest_year * 12 + (latest_month - 1);
+    let first_index = latest_index - (count as i32) + 1;
+    (0..count)
+        .map(|offset| {
+            let month_index = first_index + offset as i32;
+            let year = month_index.div_euclid(12);
+            let month = month_index.rem_euclid(12) + 1;
+            format!("{year:04}-{month:02}")
+        })
+        .collect()
+}
+
+fn parse_period(period: &str) -> (i32, i32) {
+    period
+        .split_once('-')
+        .and_then(|(y, m)| Some((y.parse::<i32>().ok()?, m.parse::<i32>().ok()?)))
+        .expect("period must be in YYYY-MM format")
 }
 
 fn build_application_indicators(
-    application_id: &str,
+    application: &ApplicationFixture,
     seed: i32,
     periods: &[String],
 ) -> Vec<ApplicationMonthlyIndicator> {
@@ -274,35 +377,20 @@ fn build_application_indicators(
         .enumerate()
         .map(|(month_idx, period)| {
             let trend = month_idx as i32;
-
-            let business_value_details = BusinessValueDetails {
-                operational_adoption_score: score(seed, trend, 13, 5, 37),
-                cross_plant_coverage_score: score(seed, trend, 11, 3, 53),
-                operational_criticality_score: score(seed, trend, 7, 2, 61),
-                process_performance_impact_score: score(seed, trend, 17, 4, 29),
-            };
-
+            let profile = simulation_profile(application);
+            let business_value_details = business_value_details(profile, seed, trend);
             let business_value_score = weighted_avg(
                 &[
                     (business_value_details.operational_adoption_score, 30),
                     (business_value_details.cross_plant_coverage_score, 20),
                     (business_value_details.operational_criticality_score, 30),
-                    (
-                        business_value_details.process_performance_impact_score,
-                        20,
-                    ),
+                    (business_value_details.process_performance_impact_score, 20),
                 ],
                 100,
             );
 
-            let technical_health_details = DoraMetrics {
-                deployment_frequency_per_month: 1 + (score(seed, trend, 5, 3, 7) % 40),
-                lead_time_for_changes_hours: 2 + ((seed * 19 + trend * 11 + 31).rem_euclid(335)) as u16,
-                change_failure_rate_pct: 2 + (score(seed, trend, 9, 7, 19) % 44),
-                mean_time_to_restore_hours: 1
-                    + ((seed * 23 + trend * 13 + 17).rem_euclid(120)) as u16,
-            };
-
+            let technical_health_details =
+                dora_metrics(profile, seed, trend, &application.source_systems);
             let technical_health_risk_score = weighted_avg(
                 &[
                     (
@@ -314,11 +402,7 @@ fn build_application_indicators(
                         25,
                     ),
                     (
-                        risk_score(
-                            technical_health_details.lead_time_for_changes_hours,
-                            2,
-                            336,
-                        ),
+                        risk_score(technical_health_details.lead_time_for_changes_hours, 2, 336),
                         25,
                     ),
                     (
@@ -330,11 +414,7 @@ fn build_application_indicators(
                         25,
                     ),
                     (
-                        risk_score(
-                            technical_health_details.mean_time_to_restore_hours,
-                            1,
-                            120,
-                        ),
+                        risk_score(technical_health_details.mean_time_to_restore_hours, 1, 120),
                         25,
                     ),
                 ],
@@ -342,7 +422,7 @@ fn build_application_indicators(
             );
 
             ApplicationMonthlyIndicator {
-                application_id: application_id.to_owned(),
+                application_id: application.id.clone(),
                 snapshot: IndicatorSnapshot {
                     period: period.clone(),
                     business_value: band_from_score(business_value_score),
@@ -355,26 +435,139 @@ fn build_application_indicators(
         .collect()
 }
 
+fn business_value_details(
+    profile: SimulationProfile,
+    seed: i32,
+    trend: i32,
+) -> BusinessValueDetails {
+    let (adoption, coverage, criticality, impact, trend_weight, volatility) = match profile {
+        SimulationProfile::Legacy => (38, 36, 76, 45, -1, 7),
+        SimulationProfile::Modern => (54, 60, 66, 64, 3, 5),
+        SimulationProfile::Platform => (64, 78, 82, 72, 2, 4),
+        SimulationProfile::ShadowIT => (34, 28, 42, 38, 1, 18),
+        SimulationProfile::SaaS => (66, 62, 58, 67, 2, 6),
+        SimulationProfile::OffTheShelf => (58, 66, 74, 62, 1, 5),
+    };
+
+    BusinessValueDetails {
+        operational_adoption_score: shaped_score(adoption, seed, trend, trend_weight, volatility),
+        cross_plant_coverage_score: shaped_score(
+            coverage,
+            seed + 2,
+            trend,
+            trend_weight / 2,
+            volatility,
+        ),
+        operational_criticality_score: shaped_score(
+            criticality,
+            seed + 4,
+            trend,
+            0,
+            volatility / 2,
+        ),
+        process_performance_impact_score: shaped_score(
+            impact,
+            seed + 6,
+            trend,
+            trend_weight,
+            volatility,
+        ),
+    }
+}
+
+fn dora_metrics(
+    profile: SimulationProfile,
+    seed: i32,
+    trend: i32,
+    sources: &[SourceSystemFixture],
+) -> DoraMetrics {
+    let telemetry_bonus = sources
+        .iter()
+        .filter(|source| {
+            source.category == SourceCategory::TechnicalDelivery
+                && source.reliability == SourceReliability::High
+                && source.completeness != SourceCompleteness::Sparse
+        })
+        .count()
+        .min(4) as i32;
+
+    match profile {
+        SimulationProfile::Legacy => DoraMetrics {
+            deployment_frequency_per_month: ranged(seed, trend, 1, 5, 1) as u8,
+            lead_time_for_changes_hours: ranged(seed + 2, trend, 190, 336, -2) as u16,
+            change_failure_rate_pct: ranged(seed + 3, trend, 26, 45, -1) as u8,
+            mean_time_to_restore_hours: ranged(seed + 4, trend, 76, 120, -1) as u16,
+        },
+        SimulationProfile::Modern => DoraMetrics {
+            deployment_frequency_per_month: ranged(seed, trend, 16 + telemetry_bonus, 38, 2) as u8,
+            lead_time_for_changes_hours: ranged(seed + 2, trend, 8, 76, -3) as u16,
+            change_failure_rate_pct: ranged(seed + 3, trend, 3, 14, -1) as u8,
+            mean_time_to_restore_hours: ranged(seed + 4, trend, 2, 28, -1) as u16,
+        },
+        SimulationProfile::Platform => DoraMetrics {
+            deployment_frequency_per_month: ranged(seed, trend, 24 + telemetry_bonus, 40, 2) as u8,
+            lead_time_for_changes_hours: ranged(seed + 2, trend, 4, 48, -2) as u16,
+            change_failure_rate_pct: ranged(seed + 3, trend, 2, 9, -1) as u8,
+            mean_time_to_restore_hours: ranged(seed + 4, trend, 1, 16, -1) as u16,
+        },
+        SimulationProfile::ShadowIT => DoraMetrics {
+            deployment_frequency_per_month: ranged(seed, trend, 1, 8, 0) as u8,
+            lead_time_for_changes_hours: ranged(seed + 2, trend, 80, 260, 3) as u16,
+            change_failure_rate_pct: ranged(seed + 3, trend, 18, 42, 2) as u8,
+            mean_time_to_restore_hours: ranged(seed + 4, trend, 48, 110, 2) as u16,
+        },
+        SimulationProfile::SaaS => DoraMetrics {
+            deployment_frequency_per_month: ranged(seed, trend, 6, 18, 1) as u8,
+            lead_time_for_changes_hours: ranged(seed + 2, trend, 24, 144, -1) as u16,
+            change_failure_rate_pct: ranged(seed + 3, trend, 4, 18, 0) as u8,
+            mean_time_to_restore_hours: ranged(seed + 4, trend, 6, 60, -1) as u16,
+        },
+        SimulationProfile::OffTheShelf => DoraMetrics {
+            deployment_frequency_per_month: ranged(seed, trend, 3, 14, 1) as u8,
+            lead_time_for_changes_hours: ranged(seed + 2, trend, 48, 190, -1) as u16,
+            change_failure_rate_pct: ranged(seed + 3, trend, 8, 26, 0) as u8,
+            mean_time_to_restore_hours: ranged(seed + 4, trend, 12, 80, -1) as u16,
+        },
+    }
+}
+
 fn build_application_source_context(
-    application: &Application,
+    application: &ApplicationFixture,
     seed: i32,
     periods: &[String],
 ) -> ApplicationSourceContext {
-    let systems = source_systems_for_type(&application.application_type);
-    let reporting_plants = reporting_plant_count(&application.application_type, seed);
-    let completeness_pct = source_completeness_pct(reporting_plants, seed);
-    let freshness = source_freshness(seed, periods, &systems);
+    let systems = application
+        .source_systems
+        .iter()
+        .map(|source| SourceSystem {
+            id: source.id.clone(),
+            name: source.name.clone(),
+            source_kind: source.source_kind.clone(),
+            url: source.url.clone(),
+            category: source.category.clone(),
+            cadence: source.cadence.clone(),
+            reliability: source.reliability.clone(),
+            completeness: source.completeness.clone(),
+        })
+        .collect::<Vec<_>>();
+    let profile = simulation_profile(application);
+    let reporting_plants = reporting_plant_count(profile, application.targeted_plants, seed);
+    let completeness_pct =
+        source_completeness_pct(reporting_plants, application.targeted_plants, &systems);
+    let freshness = source_freshness(profile, seed, periods, &systems);
     let monthly_evidence = periods
         .iter()
         .enumerate()
-        .map(|(month_idx, period)| source_evidence_snapshot(seed, month_idx as i32, period, &systems))
+        .map(|(month_idx, period)| {
+            source_evidence_snapshot(profile, seed, month_idx as i32, period, &systems)
+        })
         .collect();
 
     ApplicationSourceContext {
         application_id: application.id.clone(),
         systems,
         coverage: SourceCoverage {
-            targeted_plants: TARGETED_PLANTS,
+            targeted_plants: application.targeted_plants,
             reporting_plants,
             completeness_pct,
         },
@@ -383,369 +576,40 @@ fn build_application_source_context(
     }
 }
 
-fn source_systems_for_type(application_type: &ApplicationType) -> Vec<SourceSystem> {
-    match application_type {
-        ApplicationType::Custom => vec![
-            source_system(
-                "github",
-                "GitHub",
-                "Source Control",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Daily,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "github-actions",
-                "GitHub Actions",
-                "CI/CD",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Daily,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "argocd",
-                "ArgoCD",
-                "Deployment",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "datadog",
-                "Datadog",
-                "Observability",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::NearRealTime,
-                SourceReliability::High,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "pagerduty",
-                "PagerDuty",
-                "Incident Management",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::NearRealTime,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "application-logs",
-                "Application Logs",
-                "Application Logs",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::NearRealTime,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "okta",
-                "Okta",
-                "IAM/SSO",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "camunda",
-                "Camunda",
-                "Workflow",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "erp-mes-events",
-                "ERP/MES Events",
-                "ERP/MES events",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "mes-kpis",
-                "MES KPI Feed",
-                "Operational KPI",
-                SourceCategory::OperationalOutcome,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-        ],
-        ApplicationType::OffTheShelf => vec![
-            source_system(
-                "service-now",
-                "ServiceNow",
-                "Incident Management",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "azure-ad",
-                "Azure AD",
-                "IAM/SSO",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "workflow-engine",
-                "Workflow Engine",
-                "Workflow",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "erp-mes-events",
-                "ERP/MES Events",
-                "ERP/MES events",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "erp-kpis",
-                "ERP KPI Feed",
-                "Operational KPI",
-                SourceCategory::OperationalOutcome,
-                SourceCadence::Weekly,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-        ],
-        ApplicationType::SaaS => vec![
-            source_system(
-                "vendor-status",
-                "Vendor Status Feed",
-                "Observability",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "iam-sso",
-                "IAM/SSO",
-                "IAM/SSO",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "application-logs",
-                "Application Logs",
-                "Application Logs",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "reporting-platform",
-                "Reporting Platform",
-                "Reporting platform",
-                SourceCategory::OperationalOutcome,
-                SourceCadence::Weekly,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-        ],
-        ApplicationType::Legacy => vec![
-            source_system(
-                "legacy-incidents",
-                "Legacy Incident Register",
-                "Incident Management",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Weekly,
-                SourceReliability::Low,
-                SourceCompleteness::Sparse,
-            ),
-            source_system(
-                "legacy-logs",
-                "Legacy Application Logs",
-                "Application Logs",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Weekly,
-                SourceReliability::Low,
-                SourceCompleteness::Sparse,
-            ),
-            source_system(
-                "erp-mes-events",
-                "ERP/MES Events",
-                "ERP/MES events",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Weekly,
-                SourceReliability::Low,
-                SourceCompleteness::Sparse,
-            ),
-            source_system(
-                "excel-kpis",
-                "Spreadsheet KPI Feed",
-                "Operational KPI",
-                SourceCategory::OperationalOutcome,
-                SourceCadence::Monthly,
-                SourceReliability::Low,
-                SourceCompleteness::Sparse,
-            ),
-        ],
-        ApplicationType::Platform => vec![
-            source_system(
-                "gitlab",
-                "GitLab",
-                "Source Control",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Daily,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "jenkins",
-                "Jenkins",
-                "CI/CD",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Daily,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "kubernetes",
-                "Kubernetes",
-                "Deployment",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::NearRealTime,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "grafana",
-                "Grafana",
-                "Observability",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::NearRealTime,
-                SourceReliability::High,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "keycloak",
-                "Keycloak",
-                "IAM/SSO",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::High,
-                SourceCompleteness::Complete,
-            ),
-            source_system(
-                "workflow-platform",
-                "Workflow Platform",
-                "Workflow",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Daily,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "iot-telemetry",
-                "Industrial IoT Telemetry",
-                "Industrial IoT",
-                SourceCategory::OperationalOutcome,
-                SourceCadence::NearRealTime,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-            source_system(
-                "process-mining",
-                "Process Mining",
-                "Process mining",
-                SourceCategory::OperationalOutcome,
-                SourceCadence::Weekly,
-                SourceReliability::Medium,
-                SourceCompleteness::Partial,
-            ),
-        ],
-        ApplicationType::ShadowIT => vec![
-            source_system(
-                "manual-incident-log",
-                "Manual Incident Log",
-                "Incident Management",
-                SourceCategory::TechnicalDelivery,
-                SourceCadence::Monthly,
-                SourceReliability::Low,
-                SourceCompleteness::Sparse,
-            ),
-            source_system(
-                "local-logs",
-                "Local Usage Logs",
-                "Application Logs",
-                SourceCategory::AdoptionDiffusion,
-                SourceCadence::Weekly,
-                SourceReliability::Low,
-                SourceCompleteness::Sparse,
-            ),
-            source_system(
-                "shared-spreadsheets",
-                "Shared Spreadsheets",
-                "Reporting platform",
-                SourceCategory::OperationalOutcome,
-                SourceCadence::Monthly,
-                SourceReliability::Low,
-                SourceCompleteness::Sparse,
-            ),
-        ],
-    }
-}
-
-fn source_system(
-    id: &str,
-    name: &str,
-    source_kind: &str,
-    category: SourceCategory,
-    cadence: SourceCadence,
-    reliability: SourceReliability,
-    completeness: SourceCompleteness,
-) -> SourceSystem {
-    SourceSystem {
-        id: id.to_owned(),
-        name: name.to_owned(),
-        source_kind: source_kind.to_owned(),
-        category,
-        cadence,
-        reliability,
-        completeness,
-    }
-}
-
-fn reporting_plant_count(application_type: &ApplicationType, seed: i32) -> u8 {
-    let base: u8 = match application_type {
-        ApplicationType::Platform => 3,
-        ApplicationType::Custom => 2,
-        ApplicationType::OffTheShelf => 2,
-        ApplicationType::SaaS => 2,
-        ApplicationType::Legacy => 1,
-        ApplicationType::ShadowIT => 1,
+fn reporting_plant_count(profile: SimulationProfile, targeted_plants: u8, seed: i32) -> u8 {
+    let base: u8 = match profile {
+        SimulationProfile::Platform => targeted_plants,
+        SimulationProfile::Modern | SimulationProfile::OffTheShelf | SimulationProfile::SaaS => 2,
+        SimulationProfile::Legacy | SimulationProfile::ShadowIT => 1,
     };
     let variance = ((seed * 7 + 3).rem_euclid(2)) as u8;
-    base.saturating_add(variance).min(TARGETED_PLANTS)
+    base.saturating_add(variance).min(targeted_plants).max(1)
 }
 
-fn source_completeness_pct(reporting_plants: u8, seed: i32) -> u8 {
-    let base = (reporting_plants as i32 * 100) / (TARGETED_PLANTS as i32);
-    let adjustment = (seed * 11 + 19).rem_euclid(23) - 11;
-    (base + adjustment).clamp(15, 100) as u8
+fn source_completeness_pct(
+    reporting_plants: u8,
+    targeted_plants: u8,
+    systems: &[SourceSystem],
+) -> u8 {
+    let plant_score = (reporting_plants as i32 * 100) / (targeted_plants as i32).max(1);
+    let source_score = systems
+        .iter()
+        .map(|system| match system.completeness {
+            SourceCompleteness::Complete => 100,
+            SourceCompleteness::Partial => 65,
+            SourceCompleteness::Sparse => 30,
+        })
+        .sum::<i32>()
+        / (systems.len() as i32).max(1);
+    ((plant_score + source_score) / 2).clamp(15, 100) as u8
 }
 
-fn source_freshness(seed: i32, periods: &[String], systems: &[SourceSystem]) -> SourceFreshness {
+fn source_freshness(
+    profile: SimulationProfile,
+    seed: i32,
+    periods: &[String],
+    systems: &[SourceSystem],
+) -> SourceFreshness {
     let worst_cadence_hours = systems
         .iter()
         .map(|system| match system.cadence {
@@ -756,11 +620,23 @@ fn source_freshness(seed: i32, periods: &[String], systems: &[SourceSystem]) -> 
         })
         .max()
         .unwrap_or(24);
-
-    let staleness_offset = ((seed * 3 + 17).rem_euclid(3)) as usize;
+    let staleness_offset = match profile {
+        SimulationProfile::Legacy | SimulationProfile::ShadowIT => {
+            1 + ((seed + 1).rem_euclid(2)) as usize
+        }
+        SimulationProfile::SaaS | SimulationProfile::OffTheShelf => (seed.rem_euclid(2)) as usize,
+        SimulationProfile::Modern | SimulationProfile::Platform => 0,
+    };
     let latest_index = periods.len().saturating_sub(1);
     let period_index = latest_index.saturating_sub(staleness_offset);
-    let latency_hours = worst_cadence_hours + ((seed * 5 + 9).rem_euclid(18)) as u16;
+    let profile_latency = match profile {
+        SimulationProfile::Platform | SimulationProfile::Modern => 0,
+        SimulationProfile::SaaS | SimulationProfile::OffTheShelf => 12,
+        SimulationProfile::Legacy => 96,
+        SimulationProfile::ShadowIT => 144,
+    };
+    let latency_hours =
+        worst_cadence_hours + profile_latency + ((seed * 5 + 9).rem_euclid(18)) as u16;
 
     SourceFreshness {
         last_successful_period: periods
@@ -773,6 +649,7 @@ fn source_freshness(seed: i32, periods: &[String], systems: &[SourceSystem]) -> 
 }
 
 fn source_evidence_snapshot(
+    profile: SimulationProfile,
     seed: i32,
     month_idx: i32,
     period: &str,
@@ -793,45 +670,63 @@ fn source_evidence_snapshot(
         .count()
         .max(1)
         .min(3) as u8;
-
-    let deployment_events = if has_technical {
-        ((seed * 7 + month_idx * 5 + 19).rem_euclid(55) + 1) as u16
-    } else {
-        0
+    let (deployment_base, incident_base, login_base, workflow_base, erp_base) = match profile {
+        SimulationProfile::Legacy => (2, 9, 900, 250, 900),
+        SimulationProfile::Modern => (24, 4, 3600, 1400, 2400),
+        SimulationProfile::Platform => (32, 3, 5200, 2100, 3600),
+        SimulationProfile::ShadowIT => (1, 7, 500, 160, 260),
+        SimulationProfile::SaaS => (10, 3, 4300, 900, 900),
+        SimulationProfile::OffTheShelf => (7, 5, 3300, 1100, 1800),
     };
-    let incident_events = if has_technical {
-        ((seed * 5 + month_idx * 3 + 11).rem_euclid(14) + 1) as u16
-    } else {
-        0
-    };
-    let login_events = if has_adoption {
-        ((seed * 89 + month_idx * 211 + 1200).rem_euclid(9000) + 400) as u32
-    } else {
-        0
-    };
-    let workflow_events = if has_adoption {
-        ((seed * 31 + month_idx * 47 + 300).rem_euclid(2600) + 80) as u32
-    } else {
-        0
-    };
-    let erp_mes_events = if has_erp_mes {
-        ((seed * 43 + month_idx * 59 + 500).rem_euclid(5000) + 150) as u32
-    } else {
-        0
-    };
-    let kpi_feeds_available =
-        operational_feeds.saturating_sub(((seed + month_idx * 3 + 1).rem_euclid(2)) as u8);
 
     SourceEvidenceSnapshot {
         period: period.to_owned(),
-        deployment_events,
-        incident_events,
-        login_events,
-        workflow_events,
-        erp_mes_events,
+        deployment_events: if has_technical {
+            (deployment_base + ranged(seed, month_idx, 0, 9, 1)) as u16
+        } else {
+            0
+        },
+        incident_events: if has_technical {
+            (incident_base + ranged(seed + 2, month_idx, 0, 4, 0)) as u16
+        } else {
+            0
+        },
+        login_events: if has_adoption {
+            (login_base + ranged(seed + 3, month_idx, 0, 1200, 90)) as u32
+        } else {
+            0
+        },
+        workflow_events: if has_adoption {
+            (workflow_base + ranged(seed + 4, month_idx, 0, 600, 45)) as u32
+        } else {
+            0
+        },
+        erp_mes_events: if has_erp_mes {
+            (erp_base + ranged(seed + 5, month_idx, 0, 1400, 55)) as u32
+        } else {
+            0
+        },
         kpi_feeds_expected: operational_feeds,
-        kpi_feeds_available,
+        kpi_feeds_available: operational_feeds
+            .saturating_sub(((seed + month_idx * 3 + 1).rem_euclid(2)) as u8),
     }
+}
+
+fn metric_seed(metrics: &[MetricSourceFixture], application_id: &str) -> i32 {
+    metrics
+        .iter()
+        .filter(|metric| metric.application_id == application_id)
+        .count() as i32
+}
+
+fn shaped_score(base: i32, seed: i32, trend: i32, trend_weight: i32, volatility: i32) -> u8 {
+    let noise = (seed * 17 + trend * 11 + 23).rem_euclid((volatility * 2 + 1).max(1)) - volatility;
+    (base + trend * trend_weight + noise).clamp(0, 100) as u8
+}
+
+fn ranged(seed: i32, trend: i32, min: i32, max: i32, trend_weight: i32) -> i32 {
+    let span = (max - min + 1).max(1);
+    (min + (seed * 19 + trend * 7 + 31).rem_euclid(span) + trend * trend_weight).clamp(min, max)
 }
 
 fn weighted_avg(scores: &[(u8, u8)], denominator: u32) -> i32 {
@@ -855,10 +750,6 @@ fn reverse_risk_score(value: u16, min: u16, max: u16) -> u8 {
     100u8.saturating_sub(risk_score(value, min, max))
 }
 
-fn score(seed: i32, trend: i32, seed_factor: i32, trend_factor: i32, offset: i32) -> u8 {
-    ((seed * seed_factor + trend * trend_factor + offset).rem_euclid(101)) as u8
-}
-
 fn band_from_score(score: i32) -> HeatBand {
     match score {
         0..=34 => HeatBand::Low,
@@ -869,8 +760,10 @@ fn band_from_score(score: i32) -> HeatBand {
 
 #[cfg(test)]
 mod tests {
-    use super::{PERIOD_COUNT, build_seed_dataset, latest_month_projection};
-    use domain::SourceCategory;
+    use super::{
+        LATEST_PERIOD, PERIOD_COUNT, build_seed_dataset, latest_month_projection, load_fixtures,
+    };
+    use domain::{ApplicationType, SourceCategory};
 
     #[test]
     fn generated_dataset_has_expected_structure() {
@@ -890,7 +783,11 @@ mod tests {
         let dataset = build_seed_dataset();
         let latest = latest_month_projection(&dataset);
         assert_eq!(latest.len(), dataset.applications.len());
-        assert!(latest.iter().all(|item| item.snapshot.period == "2026-05"));
+        assert!(
+            latest
+                .iter()
+                .all(|item| item.snapshot.period == LATEST_PERIOD)
+        );
     }
 
     #[test]
@@ -930,6 +827,22 @@ mod tests {
     }
 
     #[test]
+    fn source_systems_expose_relative_source_urls() {
+        let dataset = build_seed_dataset();
+        for context in &dataset.source_contexts {
+            for source in &context.systems {
+                assert!(
+                    source.url.starts_with("/sources/"),
+                    "{}:{} has invalid URL {}",
+                    context.application_id,
+                    source.id,
+                    source.url
+                );
+            }
+        }
+    }
+
+    #[test]
     fn source_coverage_and_evidence_are_in_expected_ranges() {
         let dataset = build_seed_dataset();
         for context in &dataset.source_contexts {
@@ -942,5 +855,80 @@ mod tests {
                 assert!((1..=3).contains(&snapshot.kpi_feeds_expected));
             }
         }
+    }
+
+    #[test]
+    fn fixtures_validate_cross_references() {
+        let fixtures = load_fixtures().expect("fixtures should validate");
+        assert_eq!(
+            fixtures.enterprise.applications.len(),
+            fixtures.applications.len()
+        );
+        assert_eq!(fixtures.metrics.len(), fixtures.applications.len());
+    }
+
+    #[test]
+    fn each_application_has_twelve_indicator_and_evidence_snapshots() {
+        let dataset = build_seed_dataset();
+        for application in &dataset.applications {
+            assert_eq!(
+                dataset
+                    .monthly_indicators
+                    .iter()
+                    .filter(|item| item.application_id == application.id)
+                    .count(),
+                PERIOD_COUNT
+            );
+            assert_eq!(
+                dataset
+                    .source_contexts
+                    .iter()
+                    .find(|context| context.application_id == application.id)
+                    .expect("source context exists")
+                    .monthly_evidence
+                    .len(),
+                PERIOD_COUNT
+            );
+        }
+    }
+
+    #[test]
+    fn simulation_profiles_shape_dora_health() {
+        let dataset = build_seed_dataset();
+        let latest = latest_month_projection(&dataset);
+
+        let by_id = latest
+            .iter()
+            .map(|projection| {
+                (
+                    projection.application_id.as_str(),
+                    &projection.snapshot.technical_health_details,
+                )
+            })
+            .collect::<std::collections::BTreeMap<_, _>>();
+        let legacy = by_id.get("legacy-reporting-cube").expect("legacy app");
+        let modern = by_id.get("operator-portal").expect("modern app");
+        let platform = by_id
+            .get("industrial-data-platform-app")
+            .expect("platform app");
+
+        assert!(legacy.lead_time_for_changes_hours > modern.lead_time_for_changes_hours);
+        assert!(legacy.change_failure_rate_pct > platform.change_failure_rate_pct);
+        assert!(platform.deployment_frequency_per_month > modern.deployment_frequency_per_month);
+    }
+
+    #[test]
+    fn public_application_catalog_stays_stable() {
+        let dataset = build_seed_dataset();
+        assert_eq!(dataset.applications[0].id, "sap-s4-erp");
+        assert_eq!(
+            dataset.applications[0].application_type,
+            ApplicationType::OffTheShelf
+        );
+        assert_eq!(dataset.applications[11].id, "excel-macros-local-ops");
+        assert_eq!(
+            dataset.applications[11].application_type,
+            ApplicationType::ShadowIT
+        );
     }
 }

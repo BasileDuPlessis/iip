@@ -1,0 +1,1 @@
+{ "id": "github-actions", "application_id": "quality-tracker", "source_url": "/sources/quality-tracker/github-actions", "kind": "ci_cd_log", "description": "Quality tracker delivery events" }

@@ -1,0 +1,13 @@
+{
+  "id": "excel-macros-local-ops",
+  "name": "Excel Macros Local Ops",
+  "application_type": "ShadowIT",
+  "story": "Local macro workbook that solves immediate plant needs but produces sparse and volatile signals.",
+  "capability_ids": ["shopfloor-execution", "operational-reporting"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "manual-incident-log", "name": "Manual Incident Log", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Monthly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/excel-macros-local-ops/manual-incident-log" },
+    { "id": "local-logs", "name": "Local Usage Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "Weekly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/excel-macros-local-ops/local-logs" },
+    { "id": "shared-spreadsheets", "name": "Shared Spreadsheets", "source_kind": "Reporting platform", "category": "OperationalOutcome", "cadence": "Monthly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/excel-macros-local-ops/shared-spreadsheets" }
+  ]
+}

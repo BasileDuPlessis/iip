@@ -330,6 +330,11 @@ mod tests {
         let response = build_sources_response(&state);
         assert_ne!(response.period, "unknown");
         assert!(response.items.iter().all(|item| !item.systems.is_empty()));
+        assert!(response.items.iter().all(|item| {
+            item.systems
+                .iter()
+                .all(|system| system.url.starts_with("/sources/"))
+        }));
     }
 }
 

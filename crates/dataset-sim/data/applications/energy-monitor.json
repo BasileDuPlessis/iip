@@ -1,0 +1,14 @@
+{
+  "id": "energy-monitor",
+  "name": "Energy Monitor",
+  "application_type": "SaaS",
+  "story": "Energy monitoring SaaS with clear adoption data and external delivery signals.",
+  "capability_ids": ["operational-reporting"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "vendor-status", "name": "Vendor Status Feed", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/energy-monitor/vendor-status" },
+    { "id": "iam-sso", "name": "IAM/SSO", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/energy-monitor/iam-sso" },
+    { "id": "application-logs", "name": "Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/energy-monitor/application-logs" },
+    { "id": "reporting-platform", "name": "Reporting Platform", "source_kind": "Reporting platform", "category": "OperationalOutcome", "cadence": "Weekly", "reliability": "Medium", "completeness": "Partial", "url": "/sources/energy-monitor/reporting-platform" }
+  ]
+}
