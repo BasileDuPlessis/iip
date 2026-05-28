@@ -1,0 +1,6 @@
+[alias]
+api = "run -p api"
+dataset = "run -p dataset-sim"
+webapp-check = "check -p webapp --target wasm32-unknown-unknown"
+all-check = "check --workspace"
+all-test = "test --workspace"
