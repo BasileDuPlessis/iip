@@ -1,0 +1,13 @@
+{
+  "id": "predictive-insight",
+  "name": "Predictive Insight",
+  "application_type": "SaaS",
+  "story": "Predictive maintenance pilot using sensor telemetry.",
+  "capability_ids": ["predictive-maintenance", "asset-reliability"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-alert-usage", "theme": "adoption" },
+    { "id": "northstar-downtime-prediction-accuracy", "theme": "northstar" },
+    { "id": "technical-model-refresh-latency", "theme": "technical" }
+  ]
+}

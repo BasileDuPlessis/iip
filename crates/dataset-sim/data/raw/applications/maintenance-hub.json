@@ -1,0 +1,13 @@
+{
+  "id": "maintenance-hub",
+  "name": "Maintenance Hub",
+  "application_type": "Custom",
+  "story": "Custom maintenance workflow with improving adoption.",
+  "capability_ids": ["maintenance-work-orders", "asset-reliability"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-work-order-usage", "theme": "adoption" },
+    { "id": "northstar-asset-uptime", "theme": "northstar" },
+    { "id": "technical-build-deploy-stability", "theme": "technical" }
+  ]
+}

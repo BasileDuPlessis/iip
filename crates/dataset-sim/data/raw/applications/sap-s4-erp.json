@@ -1,0 +1,13 @@
+{
+  "id": "sap-s4-erp",
+  "name": "SAP S/4 ERP",
+  "application_type": "OffTheShelf",
+  "story": "Core ERP rollout with broad process coverage.",
+  "capability_ids": ["inventory-management", "shipment-planning"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-order-processing", "theme": "adoption" },
+    { "id": "northstar-inventory-accuracy", "theme": "northstar" },
+    { "id": "technical-integration-latency", "theme": "technical" }
+  ]
+}

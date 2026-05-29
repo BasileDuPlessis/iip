@@ -1,0 +1,13 @@
+{
+  "id": "operator-portal",
+  "name": "Operator Portal",
+  "application_type": "Custom",
+  "story": "Shopfloor portal for operator workflows.",
+  "capability_ids": ["shopfloor-execution", "maintenance-work-orders"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-operator-usage", "theme": "adoption" },
+    { "id": "northstar-workflow-completion", "theme": "northstar" },
+    { "id": "technical-deployment-stability", "theme": "technical" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "quality-tracker",
+  "name": "Quality Tracker",
+  "application_type": "Custom",
+  "story": "Quality incident and traceability app.",
+  "capability_ids": ["quality-incident-management", "traceability"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-incident-logging", "theme": "adoption" },
+    { "id": "northstar-defect-closure-rate", "theme": "northstar" },
+    { "id": "technical-response-latency", "theme": "technical" }
+  ]
+}

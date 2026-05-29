@@ -1,0 +1,13 @@
+{
+  "id": "energy-monitor",
+  "name": "Energy Monitor",
+  "application_type": "SaaS",
+  "story": "Energy monitoring SaaS for plant optimization.",
+  "capability_ids": ["energy-optimization"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-site-usage", "theme": "adoption" },
+    { "id": "northstar-energy-savings", "theme": "northstar" },
+    { "id": "technical-telemetry-freshness", "theme": "technical" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "compliance-hub",
+  "name": "Compliance Hub",
+  "application_type": "SaaS",
+  "story": "Compliance SaaS for regulatory evidence and traceability.",
+  "capability_ids": ["product-compliance", "traceability"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-evidence-usage", "theme": "adoption" },
+    { "id": "northstar-compliance-completeness", "theme": "northstar" },
+    { "id": "technical-vendor-uptime", "theme": "technical" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "inventory-pro",
+  "name": "Inventory Pro",
+  "application_type": "SaaS",
+  "story": "SaaS inventory optimizer for warehouse operations.",
+  "capability_ids": ["inventory-management", "warehouse-operations"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-warehouse-usage", "theme": "adoption" },
+    { "id": "northstar-stock-accuracy", "theme": "northstar" },
+    { "id": "technical-data-refresh-latency", "theme": "technical" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "excel-macros-local-ops",
+  "name": "Excel Macros Local Ops",
+  "application_type": "ShadowIT",
+  "story": "Local spreadsheet workaround for operational reporting.",
+  "capability_ids": ["operational-reporting"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-spreadsheet-usage", "theme": "adoption" },
+    { "id": "northstar-workaround-reduction", "theme": "northstar" },
+    { "id": "technical-macro-failure-rate", "theme": "technical" }
+  ]
+}

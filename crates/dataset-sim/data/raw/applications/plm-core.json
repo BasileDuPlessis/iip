@@ -1,0 +1,13 @@
+{
+  "id": "plm-core",
+  "name": "PLM Core",
+  "application_type": "OffTheShelf",
+  "story": "Engineering change backbone for product lifecycle management.",
+  "capability_ids": ["engineering-change-management", "product-specification-management"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-change-request-usage", "theme": "adoption" },
+    { "id": "northstar-specification-completeness", "theme": "northstar" },
+    { "id": "technical-change-throughput", "theme": "technical" }
+  ]
+}

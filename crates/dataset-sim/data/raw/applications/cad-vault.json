@@ -1,0 +1,13 @@
+{
+  "id": "cad-vault",
+  "name": "CAD Vault",
+  "application_type": "Legacy",
+  "story": "Legacy engineering repository used for historical drawings.",
+  "capability_ids": ["product-specification-management"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-drawing-access-usage", "theme": "adoption" },
+    { "id": "northstar-design-search-coverage", "theme": "northstar" },
+    { "id": "technical-archive-retrieval-latency", "theme": "technical" }
+  ]
+}

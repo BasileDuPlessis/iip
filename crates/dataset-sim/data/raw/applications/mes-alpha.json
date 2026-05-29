@@ -1,0 +1,13 @@
+{
+  "id": "mes-alpha",
+  "name": "MES Alpha",
+  "application_type": "OffTheShelf",
+  "story": "Packaged MES used on priority lines.",
+  "capability_ids": ["shopfloor-execution", "traceability"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-shopfloor-usage", "theme": "adoption" },
+    { "id": "northstar-traceability-coverage", "theme": "northstar" },
+    { "id": "technical-release-stability", "theme": "technical" }
+  ]
+}

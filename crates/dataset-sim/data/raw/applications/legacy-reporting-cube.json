@@ -1,0 +1,13 @@
+{
+  "id": "legacy-reporting-cube",
+  "name": "Legacy Reporting Cube",
+  "application_type": "Legacy",
+  "story": "Batch reporting cube with brittle operations.",
+  "capability_ids": ["operational-reporting", "kpi-management"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-report-usage", "theme": "adoption" },
+    { "id": "northstar-kpi-consistency", "theme": "northstar" },
+    { "id": "technical-batch-freshness", "theme": "technical" }
+  ]
+}

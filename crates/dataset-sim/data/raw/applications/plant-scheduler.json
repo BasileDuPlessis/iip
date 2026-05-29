@@ -1,0 +1,13 @@
+{
+  "id": "plant-scheduler",
+  "name": "Plant Scheduler",
+  "application_type": "Custom",
+  "story": "Local scheduling product replacing spreadsheets.",
+  "capability_ids": ["production-scheduling"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-planner-usage", "theme": "adoption" },
+    { "id": "northstar-schedule-accuracy", "theme": "northstar" },
+    { "id": "technical-planning-cycle-time", "theme": "technical" }
+  ]
+}

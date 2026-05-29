@@ -1,0 +1,13 @@
+{
+  "id": "industrial-data-platform-app",
+  "name": "Industrial Data Platform",
+  "application_type": "Platform",
+  "story": "Shared industrial data platform for telemetry and analytics.",
+  "capability_ids": ["industrial-data-platform", "kpi-management", "operational-reporting"],
+  "targeted_plants": 3,
+  "metrics": [
+    { "id": "adoption-data-product-consumption", "theme": "adoption" },
+    { "id": "northstar-data-product-coverage", "theme": "northstar" },
+    { "id": "technical-pipeline-success-rate", "theme": "technical" }
+  ]
+}
