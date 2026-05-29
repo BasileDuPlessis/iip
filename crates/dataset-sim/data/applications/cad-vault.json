@@ -1,0 +1,14 @@
+{
+  "id": "cad-vault",
+  "name": "CAD Vault",
+  "application_type": "Legacy",
+  "story": "Old engineering drawing repository retained for historical product references and undocumented design rules.",
+  "capability_ids": ["product-specification-management"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "legacy-incidents", "name": "Legacy Incident Register", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Weekly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/cad-vault/legacy-incidents" },
+    { "id": "legacy-logs", "name": "Legacy Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "Weekly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/cad-vault/legacy-logs" },
+    { "id": "engineering-exports", "name": "Engineering Export Logs", "source_kind": "Workflow", "category": "AdoptionDiffusion", "cadence": "Monthly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/cad-vault/engineering-exports" },
+    { "id": "drawing-kpis", "name": "Drawing KPI Feed", "source_kind": "Operational KPI", "category": "OperationalOutcome", "cadence": "Monthly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/cad-vault/drawing-kpis" }
+  ]
+}

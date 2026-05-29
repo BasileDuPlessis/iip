@@ -3,7 +3,7 @@
   "name": "Inventory Pro",
   "application_type": "SaaS",
   "story": "SaaS inventory optimizer with vendor-operated delivery and strong user telemetry.",
-  "capability_ids": ["inventory-management"],
+  "capability_ids": ["inventory-management", "warehouse-operations"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "vendor-status", "name": "Vendor Status Feed", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/inventory-pro/vendor-status" },

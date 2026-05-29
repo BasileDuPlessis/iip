@@ -3,7 +3,7 @@
   "name": "Maintenance Hub",
   "application_type": "Custom",
   "story": "Custom maintenance workflow with active product ownership and improving adoption.",
-  "capability_ids": ["maintenance-work-orders"],
+  "capability_ids": ["maintenance-work-orders", "asset-reliability"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "github", "name": "GitHub", "source_kind": "Source Control", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/maintenance-hub/github" },

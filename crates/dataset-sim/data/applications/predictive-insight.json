@@ -1,0 +1,14 @@
+{
+  "id": "predictive-insight",
+  "name": "Predictive Insight",
+  "application_type": "SaaS",
+  "story": "Industrial AI pilot using sensor telemetry to predict equipment failures and downtime risk.",
+  "capability_ids": ["predictive-maintenance", "asset-reliability"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "vendor-status", "name": "Vendor Status Feed", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/predictive-insight/vendor-status" },
+    { "id": "iam-sso", "name": "IAM/SSO", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/predictive-insight/iam-sso" },
+    { "id": "application-logs", "name": "Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/predictive-insight/application-logs" },
+    { "id": "sensor-outcomes", "name": "Sensor Outcome Feed", "source_kind": "Industrial IoT", "category": "OperationalOutcome", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/predictive-insight/sensor-outcomes" }
+  ]
+}

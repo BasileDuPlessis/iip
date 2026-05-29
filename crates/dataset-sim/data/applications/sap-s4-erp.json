@@ -3,7 +3,7 @@
   "name": "SAP S/4 ERP",
   "application_type": "OffTheShelf",
   "story": "Core ERP rollout with strong process coverage but limited engineering telemetry.",
-  "capability_ids": ["inventory-management"],
+  "capability_ids": ["inventory-management", "shipment-planning"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "service-now", "name": "ServiceNow", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/sap-s4-erp/service-now" },

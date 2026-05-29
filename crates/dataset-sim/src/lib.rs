@@ -8,7 +8,7 @@ use domain::{
 };
 use serde::{Deserialize, Serialize};
 
-pub const PERIOD_COUNT: usize = 12;
+pub const PERIOD_COUNT: usize = 24;
 pub const LATEST_PERIOD: &str = "2026-05";
 
 const ENTERPRISE_FIXTURE: &str = include_str!("../data/enterprise.json");
@@ -16,10 +16,13 @@ const APPLICATION_FIXTURES: &[&str] = &[
     include_str!("../data/applications/sap-s4-erp.json"),
     include_str!("../data/applications/mes-alpha.json"),
     include_str!("../data/applications/plm-core.json"),
+    include_str!("../data/applications/cad-vault.json"),
     include_str!("../data/applications/maintenance-hub.json"),
+    include_str!("../data/applications/predictive-insight.json"),
     include_str!("../data/applications/plant-scheduler.json"),
     include_str!("../data/applications/operator-portal.json"),
     include_str!("../data/applications/quality-tracker.json"),
+    include_str!("../data/applications/compliance-hub.json"),
     include_str!("../data/applications/inventory-pro.json"),
     include_str!("../data/applications/energy-monitor.json"),
     include_str!("../data/applications/industrial-data-platform-app.json"),
@@ -30,10 +33,13 @@ const METRIC_FIXTURES: &[&str] = &[
     include_str!("../data/metrics/sap-s4-erp/service-now.json"),
     include_str!("../data/metrics/mes-alpha/service-now.json"),
     include_str!("../data/metrics/plm-core/service-now.json"),
+    include_str!("../data/metrics/cad-vault/legacy-incidents.json"),
     include_str!("../data/metrics/maintenance-hub/github-actions.json"),
+    include_str!("../data/metrics/predictive-insight/application-logs.json"),
     include_str!("../data/metrics/plant-scheduler/github-actions.json"),
     include_str!("../data/metrics/operator-portal/github-actions.json"),
     include_str!("../data/metrics/quality-tracker/github-actions.json"),
+    include_str!("../data/metrics/compliance-hub/application-logs.json"),
     include_str!("../data/metrics/inventory-pro/application-logs.json"),
     include_str!("../data/metrics/energy-monitor/application-logs.json"),
     include_str!("../data/metrics/industrial-data-platform-app/jenkins.json"),
@@ -769,8 +775,8 @@ mod tests {
     fn generated_dataset_has_expected_structure() {
         let dataset = build_seed_dataset();
         assert_eq!(dataset.domains.len(), 6);
-        assert_eq!(dataset.capabilities.len(), 10);
-        assert_eq!(dataset.applications.len(), 12);
+        assert_eq!(dataset.capabilities.len(), 17);
+        assert_eq!(dataset.applications.len(), 15);
         assert_eq!(dataset.source_contexts.len(), dataset.applications.len());
         assert_eq!(
             dataset.monthly_indicators.len(),
@@ -868,7 +874,7 @@ mod tests {
     }
 
     #[test]
-    fn each_application_has_twelve_indicator_and_evidence_snapshots() {
+    fn each_application_has_indicator_and_evidence_snapshots_for_every_period() {
         let dataset = build_seed_dataset();
         for application in &dataset.applications {
             assert_eq!(
@@ -888,6 +894,128 @@ mod tests {
                     .monthly_evidence
                     .len(),
                 PERIOD_COUNT
+            );
+        }
+    }
+
+    #[test]
+    fn all_reference_applications_are_present() {
+        let dataset = build_seed_dataset();
+        let application_ids = dataset
+            .applications
+            .iter()
+            .map(|application| application.id.as_str())
+            .collect::<std::collections::BTreeSet<_>>();
+
+        let expected = [
+            "mes-alpha",
+            "plant-scheduler",
+            "operator-portal",
+            "energy-monitor",
+            "quality-tracker",
+            "compliance-hub",
+            "maintenance-hub",
+            "predictive-insight",
+            "sap-s4-erp",
+            "inventory-pro",
+            "plm-core",
+            "cad-vault",
+            "legacy-reporting-cube",
+            "industrial-data-platform-app",
+            "excel-macros-local-ops",
+        ];
+
+        for application_id in expected {
+            assert!(
+                application_ids.contains(application_id),
+                "missing reference application {application_id}"
+            );
+        }
+    }
+
+    #[test]
+    fn key_application_capability_mappings_match_reference() {
+        let dataset = build_seed_dataset();
+        let capabilities_by_app = dataset
+            .applications
+            .iter()
+            .map(|application| {
+                (
+                    application.id.as_str(),
+                    application
+                        .capability_ids
+                        .iter()
+                        .map(String::as_str)
+                        .collect::<Vec<_>>(),
+                )
+            })
+            .collect::<std::collections::BTreeMap<_, _>>();
+
+        assert_eq!(
+            capabilities_by_app["mes-alpha"],
+            ["shopfloor-execution", "traceability"]
+        );
+        assert_eq!(
+            capabilities_by_app["energy-monitor"],
+            ["energy-optimization"]
+        );
+        assert_eq!(
+            capabilities_by_app["sap-s4-erp"],
+            ["inventory-management", "shipment-planning"]
+        );
+        assert_eq!(
+            capabilities_by_app["industrial-data-platform-app"],
+            [
+                "industrial-data-platform",
+                "kpi-management",
+                "operational-reporting"
+            ]
+        );
+        assert_eq!(
+            capabilities_by_app["legacy-reporting-cube"],
+            ["operational-reporting", "kpi-management"]
+        );
+        assert_eq!(
+            capabilities_by_app["compliance-hub"],
+            ["product-compliance", "traceability"]
+        );
+        assert_eq!(
+            capabilities_by_app["predictive-insight"],
+            ["predictive-maintenance", "asset-reliability"]
+        );
+        assert_eq!(
+            capabilities_by_app["cad-vault"],
+            ["product-specification-management"]
+        );
+    }
+
+    #[test]
+    fn every_metric_fixture_references_declared_application_source_url() {
+        let fixtures = load_fixtures().expect("fixtures should validate");
+        let source_urls_by_application = fixtures
+            .applications
+            .iter()
+            .map(|application| {
+                (
+                    application.id.as_str(),
+                    application
+                        .source_systems
+                        .iter()
+                        .map(|source| source.url.as_str())
+                        .collect::<std::collections::BTreeSet<_>>(),
+                )
+            })
+            .collect::<std::collections::BTreeMap<_, _>>();
+
+        for metric in &fixtures.metrics {
+            let urls = source_urls_by_application
+                .get(metric.application_id.as_str())
+                .expect("metric application is declared");
+            assert!(
+                urls.contains(metric.source_url.as_str()),
+                "{} references undeclared source URL {}",
+                metric.id,
+                metric.source_url
             );
         }
     }
@@ -925,9 +1053,9 @@ mod tests {
             dataset.applications[0].application_type,
             ApplicationType::OffTheShelf
         );
-        assert_eq!(dataset.applications[11].id, "excel-macros-local-ops");
+        assert_eq!(dataset.applications[14].id, "excel-macros-local-ops");
         assert_eq!(
-            dataset.applications[11].application_type,
+            dataset.applications[14].application_type,
             ApplicationType::ShadowIT
         );
     }

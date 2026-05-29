@@ -3,7 +3,7 @@
   "name": "MES Alpha",
   "application_type": "OffTheShelf",
   "story": "Packaged MES used on priority lines with improving workflow instrumentation.",
-  "capability_ids": ["shopfloor-execution", "production-scheduling"],
+  "capability_ids": ["shopfloor-execution", "traceability"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "service-now", "name": "ServiceNow", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/mes-alpha/service-now" },

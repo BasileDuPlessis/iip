@@ -3,7 +3,7 @@
   "name": "Legacy Reporting Cube",
   "application_type": "Legacy",
   "story": "Aging reporting cube with batch refreshes, brittle operations, and stale evidence risk.",
-  "capability_ids": ["operational-reporting"],
+  "capability_ids": ["operational-reporting", "kpi-management"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "legacy-incidents", "name": "Legacy Incident Register", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Weekly", "reliability": "Low", "completeness": "Sparse", "url": "/sources/legacy-reporting-cube/legacy-incidents" },

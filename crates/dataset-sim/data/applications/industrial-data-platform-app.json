@@ -3,7 +3,7 @@
   "name": "Industrial Data Platform",
   "application_type": "Platform",
   "story": "Shared telemetry platform with broad source coverage and mature delivery practices.",
-  "capability_ids": ["industrial-data-platform"],
+  "capability_ids": ["industrial-data-platform", "kpi-management", "operational-reporting"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "gitlab", "name": "GitLab", "source_kind": "Source Control", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/industrial-data-platform-app/gitlab" },

@@ -3,7 +3,7 @@
   "name": "Energy Monitor",
   "application_type": "SaaS",
   "story": "Energy monitoring SaaS with clear adoption data and external delivery signals.",
-  "capability_ids": ["operational-reporting"],
+  "capability_ids": ["energy-optimization"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "vendor-status", "name": "Vendor Status Feed", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/energy-monitor/vendor-status" },

@@ -3,7 +3,7 @@
   "name": "PLM Core",
   "application_type": "OffTheShelf",
   "story": "Engineering change backbone with high criticality and vendor-managed release evidence.",
-  "capability_ids": ["engineering-change-management"],
+  "capability_ids": ["engineering-change-management", "product-specification-management"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "service-now", "name": "ServiceNow", "source_kind": "Incident Management", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/plm-core/service-now" },

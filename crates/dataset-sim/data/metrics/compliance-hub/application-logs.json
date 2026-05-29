@@ -1,0 +1,1 @@
+{ "id": "application-logs", "application_id": "compliance-hub", "source_url": "/sources/compliance-hub/application-logs", "kind": "analytics_log", "description": "Compliance workflow adoption analytics" }

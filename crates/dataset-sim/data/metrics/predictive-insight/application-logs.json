@@ -1,0 +1,1 @@
+{ "id": "application-logs", "application_id": "predictive-insight", "source_url": "/sources/predictive-insight/application-logs", "kind": "analytics_log", "description": "Predictive maintenance usage analytics" }

@@ -3,7 +3,7 @@
   "name": "Operator Portal",
   "application_type": "Custom",
   "story": "Shopfloor portal with healthy deployment practice and rising operator usage.",
-  "capability_ids": ["shopfloor-execution"],
+  "capability_ids": ["shopfloor-execution", "maintenance-work-orders"],
   "targeted_plants": 3,
   "source_systems": [
     { "id": "github", "name": "GitHub", "source_kind": "Source Control", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/operator-portal/github" },

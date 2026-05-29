@@ -1,0 +1,14 @@
+{
+  "id": "compliance-hub",
+  "name": "Compliance Hub",
+  "application_type": "SaaS",
+  "story": "Corporate compliance SaaS centralizing regulatory evidence and traceability reporting.",
+  "capability_ids": ["product-compliance", "traceability"],
+  "targeted_plants": 3,
+  "source_systems": [
+    { "id": "vendor-status", "name": "Vendor Status Feed", "source_kind": "Observability", "category": "TechnicalDelivery", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/compliance-hub/vendor-status" },
+    { "id": "iam-sso", "name": "IAM/SSO", "source_kind": "IAM/SSO", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "High", "completeness": "Complete", "url": "/sources/compliance-hub/iam-sso" },
+    { "id": "application-logs", "name": "Application Logs", "source_kind": "Application Logs", "category": "AdoptionDiffusion", "cadence": "Daily", "reliability": "Medium", "completeness": "Partial", "url": "/sources/compliance-hub/application-logs" },
+    { "id": "audit-evidence", "name": "Audit Evidence Feed", "source_kind": "Operational KPI", "category": "OperationalOutcome", "cadence": "Weekly", "reliability": "Medium", "completeness": "Partial", "url": "/sources/compliance-hub/audit-evidence" }
+  ]
+}
